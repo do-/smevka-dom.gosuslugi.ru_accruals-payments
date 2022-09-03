@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:common="urn:dom.gosuslugi.ru/common/1.2.0" xmlns:tns="urn:dom.gosuslugi.ru/accruals-payments-egisso/1.0.0" targetNamespace="urn:dom.gosuslugi.ru/accruals-payments-egisso/1.0.0" elementFormDefault="qualified" attributeFormDefault="unqualified">
+<!---->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:common="urn:dom.gosuslugi.ru/common/1.2.0" xmlns:tns="urn:dom.gosuslugi.ru/accruals-payments-egisso/1.0.2" targetNamespace="urn:dom.gosuslugi.ru/accruals-payments-egisso/1.0.2" elementFormDefault="qualified" attributeFormDefault="unqualified">
 	<xs:import namespace="urn:dom.gosuslugi.ru/common/1.2.0" schemaLocation="./commons/dom-gosuslugi-ru-smev3-common.xsd"/>
 	<xs:simpleType name="InformationTypeType">
 		<xs:annotation>
@@ -52,6 +53,55 @@
 		</xs:annotation>
 		<xs:restriction base="xs:string">
 			<xs:length value="18"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="PaymentDocumentTypeType">
+		<xs:annotation>
+			<xs:documentation>Тип, описывающий тип платежного документа</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="DEFAULT">
+				<xs:annotation>
+					<xs:documentation>Текущий платежный документ</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="DEBT">
+				<xs:annotation>
+					<xs:documentation>Долговой платежный документ</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="NotificationStatusType">
+		<xs:annotation>
+			<xs:documentation>Тип, описывающий статус извещения о принятии к исполнению распоряжения</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="NEW">
+				<xs:annotation>
+					<xs:documentation>Новый</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="ACKNOWLEDGED">
+				<xs:annotation>
+					<xs:documentation>Сквитирован</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="NO_POSSIBILITY_TO_ACKNOWLEDGE">
+				<xs:annotation>
+					<xs:documentation>Отсутствует возможность сквитировать</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="PARTIALLY_ACKNOWLEDGED">
+				<xs:annotation>
+					<xs:documentation>Частично сквитирован</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="PREACKNOWLEDGED">
+				<xs:annotation>
+					<xs:documentation>Предварительно сквитирован</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="AreaType">
@@ -122,12 +172,12 @@ PAYMENTS - информация о произведенных платежах.<
 												<xs:choice>
 													<xs:element name="fias-house-code" type="common:UUID">
 														<xs:annotation>
-															<xs:documentation>Глобальный уникальный идентификатор дома по ФИАС / Идентификационный код дома в ГИС ЖКХ</xs:documentation>
+															<xs:documentation>Глобальный уникальный идентификатор адреса дома по ФИАС / Идентификационный код дома в ГИС ЖКХ</xs:documentation>
 														</xs:annotation>
 													</xs:element>
 													<xs:element name="hm-house-guid" type="common:UUID">
 														<xs:annotation>
-															<xs:documentation>Глобальный уникальный идентификатор дома (РОЖФ)</xs:documentation>
+															<xs:documentation>Глобальный уникальный идентификатор дома</xs:documentation>
 														</xs:annotation>
 													</xs:element>
 													<xs:element name="room-guid" type="common:UUID">
@@ -222,7 +272,7 @@ PAYMENTS - информация о произведенных платежах.<
 		</xs:annotation>
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element name="version" type="xs:string" fixed="1.0.0">
+				<xs:element name="version" type="xs:string" fixed="1.0.2">
 					<xs:annotation>
 						<xs:documentation>Версия формата выгрузки</xs:documentation>
 					</xs:annotation>
@@ -259,6 +309,11 @@ PAYMENTS - информация о произведенных платежах.<
 						<xs:element name="payment-document-id" type="tns:PaymentDocumentIDType">
 							<xs:annotation>
 								<xs:documentation>Идентификатор платежного документа</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="payment-document-type" type="tns:PaymentDocumentTypeType">
+							<xs:annotation>
+								<xs:documentation>Тип платежного документа</xs:documentation>
 							</xs:annotation>
 						</xs:element>
 						<xs:element name="payment-document-number" type="tns:PaymentDocumentNumberType" minOccurs="0">
@@ -300,12 +355,12 @@ PAYMENTS - информация о произведенных платежах.<
 						</xs:element>
 						<xs:element name="use-total-amount-with-debt-and-advance" type="xs:boolean" fixed="true" minOccurs="0">
 							<xs:annotation>
-								<xs:documentation>Итоговая сумма по платежному документу указана с учетом суммы задолженности</xs:documentation>
+								<xs:documentation>Итоговая сумма по платежному документу указана с учетом суммы задолженности/переплаты</xs:documentation>
 							</xs:annotation>
 						</xs:element>
 						<xs:element name="total-amount-with-debt-and-advance" type="xs:decimal" minOccurs="0">
 							<xs:annotation>
-								<xs:documentation>Итоговая сумма по платежному документу указана с учетом суммы задолженности</xs:documentation>
+								<xs:documentation>Итоговая сумма по платежному документу с учетом суммы задолженности/переплаты</xs:documentation>
 							</xs:annotation>
 						</xs:element>
 						<xs:element name="service-provider" type="tns:AccrualServiceProviderType" maxOccurs="unbounded">
@@ -314,11 +369,47 @@ PAYMENTS - информация о произведенных платежах.<
 разрезе поставщиков услуг (ресурсов)</xs:documentation>
 							</xs:annotation>
 						</xs:element>
-						<xs:element name="service" type="tns:AccrualServiceType" maxOccurs="unbounded">
+						<xs:element name="service" maxOccurs="unbounded">
 							<xs:annotation>
 								<xs:documentation>Cумма начисленных денежных средств 
 разрезе услуг (ресурсов)</xs:documentation>
 							</xs:annotation>
+							<xs:complexType>
+								<xs:complexContent>
+									<xs:extension base="tns:AccrualServiceType">
+										<xs:choice minOccurs="0">
+											<xs:element name="main-municipal-service" type="tns:AccrualServiceType" minOccurs="0" maxOccurs="unbounded">
+												<xs:annotation>
+													<xs:documentation>Начисления по главным коммунальным услугам, сгруппированных в рамках вида коммунальной услуги</xs:documentation>
+												</xs:annotation>
+											</xs:element>
+											<xs:element name="municipal-resource" minOccurs="0" maxOccurs="unbounded">
+												<xs:annotation>
+													<xs:documentation>Начисления платежного документа по коммунальным ресурсам на содержание общего имущества</xs:documentation>
+												</xs:annotation>
+												<xs:complexType>
+													<xs:complexContent>
+														<xs:extension base="tns:AccrualMunicipalResourceType">
+															<xs:sequence minOccurs="0">
+																<xs:element name="main-municipal-resource" minOccurs="0" maxOccurs="unbounded">
+																	<xs:annotation>
+																		<xs:documentation>Начисления по главным коммунальным ресурсам, сгруппированным в рамках вида коммунального ресурса</xs:documentation>
+																	</xs:annotation>
+																	<xs:complexType>
+																		<xs:complexContent>
+																			<xs:extension base="tns:AccrualMunicipalResourceType"/>
+																		</xs:complexContent>
+																	</xs:complexType>
+																</xs:element>
+															</xs:sequence>
+														</xs:extension>
+													</xs:complexContent>
+												</xs:complexType>
+											</xs:element>
+										</xs:choice>
+									</xs:extension>
+								</xs:complexContent>
+							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
 				</xs:complexType>
@@ -339,6 +430,11 @@ PAYMENTS - информация о произведенных платежах.<
 						<xs:element name="notification-guid" type="common:UUID">
 							<xs:annotation>
 								<xs:documentation>Идентификатор извещения о приятии к распоряжению</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="status" type="tns:NotificationStatusType">
+							<xs:annotation>
+								<xs:documentation>Статус извещения</xs:documentation>
 							</xs:annotation>
 						</xs:element>
 						<xs:element name="order-no" minOccurs="0">
@@ -499,6 +595,11 @@ PAYMENTS - информация о произведенных платежах.<
 											<xs:documentation>Идентификатор платежного документа</xs:documentation>
 										</xs:annotation>
 									</xs:element>
+									<xs:element name="payment-document-type" type="tns:PaymentDocumentTypeType">
+										<xs:annotation>
+											<xs:documentation>Тип платежного документа</xs:documentation>
+										</xs:annotation>
+									</xs:element>
 									<xs:element name="payment-document-number" type="tns:PaymentDocumentNumberType" minOccurs="0">
 										<xs:annotation>
 											<xs:documentation>Номер платежного документа</xs:documentation>
@@ -608,122 +709,6 @@ PAYMENTS - информация о произведенных платежах.<
 			</xs:element>
 		</xs:sequence>
 	</xs:complexType>
-	<xs:complexType name="ExportHousingFundObjectType">
-		<xs:annotation>
-			<xs:documentation>Тип, описывающий выгружаемую информация об объекте жилищного фонда</xs:documentation>
-		</xs:annotation>
-		<xs:sequence>
-			<xs:element name="house-guid" type="common:UUID">
-				<xs:annotation>
-					<xs:documentation>Идентификационный код дома в ГИС ЖКХ</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="fias-house-guid" type="common:UUID" minOccurs="0">
-				<xs:annotation>
-					<xs:documentation>Глобальный уникальный идентификатор дома по ФИАС</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="rao-guid" type="common:UUID">
-				<xs:annotation>
-					<xs:documentation>Глобальный уникальный идентификатор дома (РАО)</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="address">
-				<xs:annotation>
-					<xs:documentation>Неформализованное описание адреса</xs:documentation>
-				</xs:annotation>
-				<xs:simpleType>
-					<xs:restriction base="xs:string">
-						<xs:maxLength value="4000"/>
-						<xs:minLength value="1"/>
-					</xs:restriction>
-				</xs:simpleType>
-			</xs:element>
-			<xs:element name="type" type="common:NSIRefType">
-				<xs:annotation>
-					<xs:documentation>Тип дома.  Указывается запись из справочника "Тип дома"</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="hostel" minOccurs="0">
-				<xs:annotation>
-					<xs:documentation>Дом в полном объеме используется в качестве общежития</xs:documentation>
-				</xs:annotation>
-				<xs:complexType>
-					<xs:choice>
-						<xs:element name="federal" type="xs:boolean">
-							<xs:annotation>
-								<xs:documentation>Дом находится в собственности субъекта Российской Федерации</xs:documentation>
-							</xs:annotation>
-						</xs:element>
-						<xs:element name="municipal" type="xs:boolean">
-							<xs:annotation>
-								<xs:documentation>Дом находится в муниципальной собственности</xs:documentation>
-							</xs:annotation>
-						</xs:element>
-					</xs:choice>
-				</xs:complexType>
-			</xs:element>
-			<xs:element name="hostel-type" type="common:NSIRefType" minOccurs="0">
-				<xs:annotation>
-					<xs:documentation>Тип общежития. Указывается запись из справочника "Тип общежития"</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="house-state" type="common:NSIRefType">
-				<xs:annotation>
-					<xs:documentation>Состояние дома</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="house-heating-system-type" type="common:NSIRefType" minOccurs="0">
-				<xs:annotation>
-					<xs:documentation>Тип внутридомовой системы отопления. Указывается запись из справочника "Тип внутридомовой системы отопления"</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="hot-water-supply-system-type" type="common:NSIRefType" minOccurs="0">
-				<xs:annotation>
-					<xs:documentation>Тип внутридомовой инженерной системы горячего водоснабжения. Указывается запись из справочника "Тип внутридомовой инженерной системы горячего водоснабжения"</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="in-house-engineering-drainage-system" type="common:NSIRefType" minOccurs="0">
-				<xs:annotation>
-					<xs:documentation>Тип внутридомовой инженерной системы водоотведения. Указывается запись из справочника "Тип внутридомовой инженерной системы водоотведени"</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="in-house-engineering-cold-water-supply-system" type="common:NSIRefType" minOccurs="0">
-				<xs:annotation>
-					<xs:documentation>Тип внутридомовой инженерной системы холодного водоснабжени. Указывается запись из справочника "Тип внутридомовой инженерной системы холодного водоснабжения"</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="in-house-engineering-gas-supply-system" type="common:NSIRefType" minOccurs="0">
-				<xs:annotation>
-					<xs:documentation>Тип внутридомовой инженерной системы газоснабжения. Указывается запись из справочника "Тип внутридомовой инженерной системы газоснабжения"</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:choice minOccurs="0">
-				<xs:element name="room" type="tns:RoomType" minOccurs="1">
-					<xs:annotation>
-						<xs:documentation>Информация о комнатах по объекту</xs:documentation>
-					</xs:annotation>
-				</xs:element>
-				<xs:element name="premise" type="tns:PremiseType" minOccurs="1">
-					<xs:annotation>
-						<xs:documentation>Информация о помещениях/блоках по объекту</xs:documentation>
-					</xs:annotation>
-				</xs:element>
-			</xs:choice>
-			<xs:choice minOccurs="0">
-				<xs:element name="accrual" type="tns:ExportAccrualType" minOccurs="1" maxOccurs="1">
-					<xs:annotation>
-						<xs:documentation>Информация по начислениям</xs:documentation>
-					</xs:annotation>
-				</xs:element>
-				<xs:element name="payment" type="tns:ExportPaymentsType" maxOccurs="unbounded">
-					<xs:annotation>
-						<xs:documentation>Информация об извещениях о принятии к исполнению распоряжения</xs:documentation>
-					</xs:annotation>
-				</xs:element>
-			</xs:choice>
-		</xs:sequence>
-	</xs:complexType>
 	<xs:complexType name="NormType">
 		<xs:annotation>
 			<xs:documentation>Тип, описывающий нормативы потребления коммунальных услуг</xs:documentation>
@@ -765,7 +750,7 @@ PAYMENTS - информация о произведенных платежах.<
 					<xs:documentation>Вид норматива. Указывается запись из справочника "Вид норматива"</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element name="nsi-service-type" type="common:NSIRefType">
+			<xs:element name="nsi-service-type" type="common:NSIRefType" minOccurs="0">
 				<xs:annotation>
 					<xs:documentation>Вид коммунальной услуги. Указывается запись из справочника "Вид коммунальной услуги"</xs:documentation>
 				</xs:annotation>
@@ -1274,7 +1259,7 @@ PAYMENTS - информация о произведенных платежах.<
 			</xs:element>
 			<xs:element name="total-amount" type="xs:decimal" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>Итого к оплате</xs:documentation>
+					<xs:documentation>Итого к оплате (с учетом задолженности/аванса, неустоек и судебных расходов)</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="amount-by-service" type="xs:decimal" minOccurs="0">
@@ -1282,12 +1267,12 @@ PAYMENTS - информация о произведенных платежах.<
 					<xs:documentation>К оплате за расчетный период, рублей</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element name="tariff" type="xs:integer" minOccurs="0">
+			<xs:element name="tariff" type="xs:decimal" minOccurs="0">
 				<xs:annotation>
 					<xs:documentation>Тариф/размер платы/размер взноса</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element name="individual-consumption-norm" type="xs:integer" minOccurs="0">
+			<xs:element name="individual-consumption-norm" type="xs:decimal" minOccurs="0">
 				<xs:annotation>
 					<xs:documentation>Норматив потребления</xs:documentation>
 				</xs:annotation>
@@ -1359,6 +1344,96 @@ house(O)verallNeeds - объем коммунальных ресурсов, по
 			</xs:element>
 		</xs:sequence>
 	</xs:complexType>
+	<xs:complexType name="AccrualMunicipalResourceType">
+		<xs:annotation>
+			<xs:documentation>Тип, описывающий начисление по коммунальному ресурсу в рамках услуги по содержанию общего имущества в начислениях</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="guid" type="common:UUID">
+				<xs:annotation>
+					<xs:documentation>Идентификатор коммунального ресурса</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="resource-type" type="common:NSIRefType">
+				<xs:annotation>
+					<xs:documentation>Вид коммунального ресурса</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="total-amount" type="xs:decimal" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Итого к оплате (с учетом задолженности/аванса, неустоек и судебных расходов)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="amount" type="xs:decimal" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>К оплате за расчетный период, рублей</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="tariff" type="xs:decimal" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Тариф/размер платы/размер взноса</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="okei" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>ЕИ коммунального ресурса</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="code">
+							<xs:annotation>
+								<xs:documentation>ЕИ коммунального ресурса (Код записи справочника ОКЕИ)</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:pattern value="\d{3}"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="name">
+							<xs:annotation>
+								<xs:documentation>ЕИ коммунального ресурса (Наименование записи справочника ОКЕИ)</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+									<xs:maxLength value="500"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="volume" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Объем общедомового потребления коммунального ресурса</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="consumption-measure-type" type="tns:ConsumptionMeasureTypeType" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Способ определения объемов потребленния:
+(N)orm - Норматив
+(M)etering device - Прибор учета
+(O)ther - Иное</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="consumption" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Объем ресурса</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:decimal">
+									<xs:totalDigits value="22"/>
+									<xs:fractionDigits value="7"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
 	<xs:complexType name="PaymentServiceType">
 		<xs:annotation>
 			<xs:documentation>Тип, описывающий услугу в информации об извещениях о принятии к исполнению распоряжения</xs:documentation>
@@ -1409,17 +1484,17 @@ house(O)verallNeeds - объем коммунальных ресурсов, по
 		<xs:sequence>
 			<xs:element name="fias-house-code" type="common:UUID">
 				<xs:annotation>
-					<xs:documentation>Идентификационный код дома в ГИС ЖКХ</xs:documentation>
+					<xs:documentation>Идентификационный код адреса дома в ГИС ЖКХ</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="original-fias-house-code" type="common:UUID" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>Глобальный уникальный идентификатор дома по ФИАС</xs:documentation>
+					<xs:documentation>Глобальный уникальный идентификатор адреса дома по ФИАС</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="hm-house-guid" type="common:UUID">
 				<xs:annotation>
-					<xs:documentation>Глобальный уникальный идентификатор дома (РОЖФ)</xs:documentation>
+					<xs:documentation>Глобальный уникальный идентификатор дома</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="address-string">
@@ -1472,7 +1547,7 @@ house(O)verallNeeds - объем коммунальных ресурсов, по
 					<xs:documentation>Тип внутридомовой системы отопления. Указывается запись из справочника "Тип внутридомовой системы отопления"</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element name="hot-water-supply-system-type" type="common:NSIRefType" minOccurs="0">
+			<xs:element name="hot-water-supply-system-type" type="common:NSIRefType" minOccurs="0" maxOccurs="unbounded">
 				<xs:annotation>
 					<xs:documentation>Тип внутридомовой инженерной системы горячего водоснабжения. Указывается запись из справочника "Тип внутридомовой инженерной системы горячего водоснабжения"</xs:documentation>
 				</xs:annotation>
@@ -1522,7 +1597,7 @@ house(O)verallNeeds - объем коммунальных ресурсов, по
 				</xs:element>
 				<xs:element name="unified-account-is-unknown" type="xs:boolean" fixed="true">
 					<xs:annotation>
-						<xs:documentation>Номер единого лицевого счета не определен. Возможно, в случае если запрошены данные по помещения, на которое не размещен ЕЛС.</xs:documentation>
+						<xs:documentation>Номер единого лицевого счета не определен. Возможно, в случае если запрошены данные по помещению, на которое не размещен ЕЛС.</xs:documentation>
 					</xs:annotation>
 				</xs:element>
 			</xs:choice>
