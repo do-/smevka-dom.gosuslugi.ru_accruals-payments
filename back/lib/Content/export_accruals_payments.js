@@ -44,8 +44,7 @@ get_response_of_export_accruals_payments:
     		},
     		
     		_FSAttachmentsList: [
-    			{uuid: '78cbaf77-4ebe-11ec-977f-005056b665bf', FileName: '/78cbaf77-4ebe-11ec-977f-005056b665bf.zip'},
-    			{uuid: '78d9e04a-4ebe-11ec-977f-005056b665bf', FileName: '/78d9e04a-4ebe-11ec-977f-005056b665bf.zip'},
+    			{uuid: '35c3561e-cd4f-4d38-ae7b-bcbd3f7047eb', FileName: '/35c3561e-cd4f-4d38-ae7b-bcbd3f7047eb.zip'},
     		],
     		
     	}
